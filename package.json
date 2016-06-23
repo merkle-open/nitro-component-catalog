@@ -1,0 +1,27 @@
+{
+  "name": "nitro-pattern-navigation",
+  "version": "0.0.1",
+  "description": "A helper to resolve and parse the nitro pattern structure and meta files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namics/node-modules.git"
+  },
+  "keywords": [
+    "cache"
+  ],
+  "author": "Jan Nicklas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/namics/node-modules/issues"
+  },
+  "homepage": "https://github.com/namics/node-modules#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "lodash": "^4.13.1",
+    "nitro-pattern-resolver": "git://github.com/namics/node-modules.git#nitro-pattern-resolver"
+  }
+}
