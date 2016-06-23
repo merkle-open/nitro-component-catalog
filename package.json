@@ -1,5 +1,5 @@
 {
-  "name": "nitro-pattern-navigation",
+  "name": "nitro-pattern-navigator",
   "version": "0.0.1",
   "description": "A helper to resolve and parse the nitro pattern structure and meta files",
   "main": "index.js",
