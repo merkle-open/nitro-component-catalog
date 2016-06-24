@@ -61,7 +61,7 @@ module.exports = function(config) {
     rootDirectory: config.root,
     examples: true
   });
-  
+
 
   var webpackStats;
   if (config.webpackApp) {
@@ -72,6 +72,13 @@ module.exports = function(config) {
 
   function getExampleRenderData(componentType, componentName) {
     var depdencyInformation = getDependencyInformation(componentType, componentName, webpackStats);
+    // Fallback if dependencies couldn't be read
+    if (!dependencyInformation) {
+      dependencyInformation = {
+        dependencies: []
+        dependents: []
+      }
+    }
     return nitroPatternResolver.getComponent(componentType + '/' + componentName)
       // Filter if only a specific example should be shown
       .then(function(component) {
