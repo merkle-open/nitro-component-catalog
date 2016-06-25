@@ -5,6 +5,7 @@ var assert = require('assert');
 var NitroPatternResolver = require('nitro-pattern-resolver');
 var WebpackDependencyStats = require('webpack-dependency-stats');
 var _ = require('lodash');
+var PatternValidator = require('nitro-pattern-validator');
 
 /**
  * Extracts all dependencies and dependents for the given compmonent from the webpack stats object
@@ -61,7 +62,9 @@ module.exports = function(config) {
   assert(config.root && fs.existsSync(config.root), `Please specify your component root folder e.g. { root: '/a/path'}`);
   assert(config.exampleTemplate, `Please specify your example templat e.g. { exampleTemplate: 'example.hbs' }`);
   assert(config.navigationTemplate, `Please specify your navigation templat e.g. { navigationTemplate: 'navigation.hbs' }`);
+
   var app = express();
+  var nitroPatternValidator = config.nitroPatternValidator || new PatternValidator();
   var nitroPatternResolver = config.nitroPatternResolver || new NitroPatternResolver({
     rootDirectory: config.root,
     examples: true
@@ -101,6 +104,7 @@ module.exports = function(config) {
   app.get('/', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
+        nitroPatternValidator.validateComponents(patternFileInfo);
         res.render(config.navigationTemplate, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
@@ -111,6 +115,7 @@ module.exports = function(config) {
   app.get('/components', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
+        nitroPatternValidator.validateComponents(patternFileInfo);
         res.render(config.navigationTemplate, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
@@ -121,6 +126,7 @@ module.exports = function(config) {
   app.get('/components/:componentType', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
+        nitroPatternValidator.validateComponents(patternFileInfo);
         res.render(config.navigationTemplate, {
           patternFileInfo: _.sortBy(_.filter(patternFileInfo, function(pattern) {
             return pattern.type === req.params.componentType;
@@ -132,7 +138,10 @@ module.exports = function(config) {
 
   app.get('/components/:componentType/:componentName', function(req, res, next) {
     getExampleRenderData(req.params.componentType, req.params.componentName)
-      .then((renderData) => res.render(config.exampleTemplate, renderData))
+      .then((renderData) => {
+        nitroPatternValidator.validateComponent(renderData.component);
+        res.render(config.exampleTemplate, renderData);
+      })
       .catch(next);
   });
 
