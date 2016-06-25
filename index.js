@@ -67,7 +67,8 @@ module.exports = function(config) {
   var nitroPatternValidator = config.nitroPatternValidator || new PatternValidator();
   var nitroPatternResolver = config.nitroPatternResolver || new NitroPatternResolver({
     rootDirectory: config.root,
-    examples: true
+    examples: true,
+    readme: true
   });
 
   // Optional - track webpack dependencies
@@ -87,12 +88,16 @@ module.exports = function(config) {
       .then(function(component) {
         return nitroPatternResolver.getComponentExamples(component.directory)
           .then(function(examples) {
-            return {
-              examples: examples,
-              component: component,
-              componentDependencies: dependencyInformation.dependencies,
-              componentDependents: dependencyInformation.dependents,
-            };
+            return nitroPatternResolver.getComponentReadme(component.directory)
+              .then(function(readme) {
+                return {
+                  examples: examples,
+                  component: component,
+                  componentDependencies: dependencyInformation.dependencies,
+                  componentDependents: dependencyInformation.dependents,
+                  readme: readme
+                };
+            });
           });
         });
   }
