@@ -3,53 +3,58 @@ var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
 var NitroPatternResolver = require('nitro-pattern-resolver');
+var WebpackDependencyStats = require('webpack-dependency-stats');
 var _ = require('lodash');
 
-function getDependencyInformation(componentType, componentName, webpackStats) {
-  if (!webpackStats) {
-    return;
+/**
+ * Extracts all dependencies and dependents for the given compmonent from the webpack stats object
+ */
+function getDependencyInformation(componentType, componentName, webpackDependencyStats, baseHref) {
+  var result = {dependencies: [], dependents: []};
+  // In case the proejct does not use webpack
+  // or the first webpack build wasn't completed return an empty result
+  if (!webpackDependencyStats) {
+    return result;
   }
-  var componentPattern = /(components)[\\\/]([^\\\/]+)[\\\/]([^\\\/]+)/;
-  var components = {};
-  var modules = {};
-  var moduleComponentMapping = {};
-  var webpackModules = webpackStats.toJson().modules
-    .filter((module) => module.name && componentPattern.test(module.name));
-
-  webpackModules.forEach(function(module) {
-    var componentPath = module.name.match(componentPattern);
-    var moduleName = componentPath[2] + '/' + componentPath[3];
-    moduleComponentMapping[module.id] = moduleName;
-    components[moduleName] = {
-      name: moduleName,
-      componentType: componentPath[2],
-      componentName: componentPath[3],
-      dependents: {},
-      dependencies: {}
-    };
-    modules[module.id] = {
-      id: module.id,
-      componentType: componentPath[2],
-      componentName: componentPath[3],
-    }
-  });
-
-  webpackModules.forEach((module) => module.reasons.forEach((reason) => {
-    var moduleName = moduleComponentMapping[module.id];
-    var reasonName = moduleComponentMapping[reason.moduleId];
-    if (reasonName && reasonName !== moduleName && components[reasonName]) {
-      components[reasonName].dependencies[moduleName] = components[moduleName];
-      components[moduleName].dependents[reasonName] = components[reasonName];
-    }
-  }));
-
-  webpackModules.forEach((module) => {
-    var component = components[moduleComponentMapping[module.id]];
-    component.dependencies = Object.values(component.dependencies);
-    component.dependents = Object.values(component.dependents);
-  });
-
-  return components[componentType + '/' + componentName];
+  // Turn the componentType and componentName into the webpack module identifier format
+  var componentEntryPoint = './' + componentType + '/' + componentName + '/js/' + componentName + '.';
+  // Search for matching webpack modules
+  var moduleName = (Object.keys(webpackDependencyStats.filteredModules.byName).filter(function(name) {
+    return name.indexOf(componentEntryPoint) === 0;
+  })).filter(function(name) {
+    return /[/][^/]+\.(js|ts)$/.test(name);
+  })[0];
+  // Skip if no matching webpack module for the componentType and name was found
+  if (!moduleName) {
+    return result;
+  }
+  var componentPath = componentType + '/' + componentName;
+  // strip 'js/moduleName.ts' and 'css/modulename.scss'
+  result.dependencies = _.sortedUniq(
+      webpackDependencyStats.getDependencies(moduleName)
+        // turn './atoms/moduleName/js/moduleName.ts' into 'atoms/moduleName'
+        .map((dependencyName) => dependencyName.split('/').slice(1,3).join('/'))
+      )
+      // remove self references
+      .filter((dependencyPath) => componentPath !== dependencyPath)
+      // add link
+      .map((dependencyPath) => ({
+        name: dependencyPath,
+        url: baseHref + dependencyPath
+      }));
+  result.dependents = _.sortedUniq(
+      webpackDependencyStats.getDependents(moduleName)
+        // turn './atoms/moduleName/js/moduleName.ts' into 'atoms/moduleName'
+        .map((dependentName) => dependentName.split('/').slice(1,3).join('/'))
+      )
+      // remove self references
+      .filter((dependentPath) => componentPath !== dependentPath)
+      // add link
+      .map((dependentPath) => ({
+        name: dependentPath,
+        url: baseHref + dependentPath
+      }));
+  return result;
 }
 
 module.exports = function(config) {
@@ -62,23 +67,18 @@ module.exports = function(config) {
     examples: true
   });
 
-
-  var webpackStats;
-  if (config.webpackApp) {
-    config.webpackApp.on('compilation-done', function(stats) {
-      webpackStats = stats;
+  // Optional - track webpack dependencies
+  var webpackDependencyStats;
+  if (config.webpack) {
+    config.webpack.plugin('done', function(stats) {
+      webpackDependencyStats = new WebpackDependencyStats(stats, {
+        srcFolder: config.root
+      });
     });
   }
 
   function getExampleRenderData(componentType, componentName) {
-    var depdencyInformation = getDependencyInformation(componentType, componentName, webpackStats);
-    // Fallback if dependencies couldn't be read
-    if (!dependencyInformation) {
-      dependencyInformation = {
-        dependencies: []
-        dependents: []
-      }
-    }
+    var dependencyInformation = getDependencyInformation(componentType, componentName, webpackDependencyStats, app.locals.baseHref + '/components/');
     return nitroPatternResolver.getComponent(componentType + '/' + componentName)
       // Filter if only a specific example should be shown
       .then(function(component) {
@@ -87,14 +87,8 @@ module.exports = function(config) {
             return {
               examples: examples,
               component: component,
-              componentDependencies: depdencyInformation.dependencies.map(function(dependency) {
-                dependency.url = app.locals.baseHref + '/components/' + dependency.name;
-                return dependency;
-              }),
-              componentDependents: depdencyInformation.dependents.map(function(dependent) {
-                dependent.url = app.locals.baseHref + '/components/' + dependent.name;
-                return dependent;
-              })
+              componentDependencies: dependencyInformation.dependencies,
+              componentDependents: dependencyInformation.dependents,
             };
           });
         });
