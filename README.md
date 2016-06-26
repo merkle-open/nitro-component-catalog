@@ -23,11 +23,14 @@ module.exports = function(app) {
     // The location of your component source files
   	root: path.resolve(__dirname, '../../components'),
 
-    // The example view 'example' resolves to views/example.hbs
-  	exampleTemplate: 'example',
+    // The component preview view - 'preview' resolves to  views/component.hbs
+  	componentView: 'component',
 
-    // The navigation view 'navigation' resolves to views/navigation.hbs
-  	navigationTemplate: 'navigation',
+    // The example view - 'example' resolves to views/example.hbs
+  	exampleView: 'example',
+
+    // The navigation view - 'navigation' resolves to views/navigation.hbs
+  	navigationView: 'navigation',
 
     // Optional if you are using the webpack you might pass the compiler instance:
   	webpackApp: require('./webpack').webpackMiddleware,

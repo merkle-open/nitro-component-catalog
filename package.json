@@ -21,8 +21,11 @@
   "homepage": "https://github.com/namics/node-modules#readme",
   "dependencies": {
     "ajv": "^4.1.3",
+    "denodeify": "^1.2.1",
     "express": "^4.14.0",
+    "highlight.js": "^9.4.0",
     "lodash": "^4.13.1",
+    "marked": "^0.3.5",
     "nitro-pattern-resolver": "git://github.com/namics/node-modules.git#nitro-pattern-resolver",
     "nitro-pattern-validator": "git://github.com/namics/node-modules.git#nitro-pattern-validator",
     "webpack-dependency-stats": "0.0.3"

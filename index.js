@@ -3,9 +3,11 @@ var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
 var NitroPatternResolver = require('nitro-pattern-resolver');
+var NitroPatternValidator = require('nitro-pattern-validator');
 var WebpackDependencyStats = require('webpack-dependency-stats');
 var _ = require('lodash');
-var PatternValidator = require('nitro-pattern-validator');
+var readmeRenderer = require('./lib/readme-renderer.js');
+var exampleRenderer = require('./lib/example-renderer.js');
 
 /**
  * Extracts all dependencies and dependents for the given compmonent from the webpack stats object
@@ -60,17 +62,19 @@ function getDependencyInformation(componentType, componentName, webpackDependenc
 
 module.exports = function(config) {
   assert(config.root && fs.existsSync(config.root), `Please specify your component root folder e.g. { root: '/a/path'}`);
-  assert(config.exampleTemplate, `Please specify your example templat e.g. { exampleTemplate: 'example.hbs' }`);
-  assert(config.navigationTemplate, `Please specify your navigation templat e.g. { navigationTemplate: 'navigation.hbs' }`);
+  assert(config.componentView, `Please specify your component view e.g. { componentView: 'component.hbs' }`);
+  assert(config.exampleView, `Please specify your example view e.g. { exampleView: 'example.hbs' }`);
+  assert(config.navigationView, `Please specify your navigation view e.g. { navigationView: 'navigation.hbs' }`);
 
   var app = express();
-  var nitroPatternValidator = config.nitroPatternValidator || new PatternValidator();
+  var nitroPatternValidator = config.nitroPatternValidator || new NitroPatternValidator();
   var nitroPatternResolver = config.nitroPatternResolver || new NitroPatternResolver({
     rootDirectory: config.root,
     examples: true,
-    readme: true
+    readme: true,
+    readmeRenderer: (renderData) => readmeRenderer(renderData),
+    exampleRenderer: (renderData) => exampleRenderer(renderData, app, config.exampleView)
   });
-
   // Optional - track webpack dependencies
   var webpackDependencyStats;
   if (config.webpack) {
@@ -110,7 +114,7 @@ module.exports = function(config) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
         nitroPatternValidator.validateComponents(patternFileInfo);
-        res.render(config.navigationTemplate, {
+        res.render(config.navigationView, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
       })
@@ -121,7 +125,7 @@ module.exports = function(config) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
         nitroPatternValidator.validateComponents(patternFileInfo);
-        res.render(config.navigationTemplate, {
+        res.render(config.navigationView, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
       })
@@ -132,7 +136,7 @@ module.exports = function(config) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
         nitroPatternValidator.validateComponents(patternFileInfo);
-        res.render(config.navigationTemplate, {
+        res.render(config.navigationView, {
           patternFileInfo: _.sortBy(_.filter(patternFileInfo, function(pattern) {
             return pattern.type === req.params.componentType;
           }), 'name')
@@ -145,7 +149,7 @@ module.exports = function(config) {
     getExampleRenderData(req.params.componentType, req.params.componentName)
       .then((renderData) => {
         nitroPatternValidator.validateComponent(renderData.component);
-        res.render(config.exampleTemplate, renderData);
+        res.render(config.componentView, renderData);
       })
       .catch(next);
   });
