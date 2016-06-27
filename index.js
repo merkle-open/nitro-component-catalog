@@ -74,7 +74,7 @@ module.exports = function(config) {
     examples: true,
     readme: true,
     readmeRenderer: (resolver, renderData) => readmeRenderer(resolver, renderData),
-    exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial)
+    exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial, app.locals.baseHref + '/components/')
   });
   // Optional - track webpack dependencies
   var webpackDependencyStats;
@@ -86,13 +86,16 @@ module.exports = function(config) {
     });
   }
 
-  function getExampleRenderData(componentType, componentName) {
+  function getExampleRenderData(componentType, componentName, exampleName) {
     var dependencyInformation = getDependencyInformation(componentType, componentName, webpackDependencyStats, app.locals.baseHref + '/components/');
     return nitroPatternResolver.getComponent(componentType + '/' + componentName)
-      // Filter if only a specific example should be shown
       .then(function(component) {
         return nitroPatternResolver.getComponentExamples(component.directory)
           .then(function(examples) {
+            // Filter if only a specific example should be shown
+            if (exampleName) {
+              examples = examples.filter((example) => example.name === exampleName);
+            }
             return nitroPatternResolver.getComponentReadme(component.directory)
               .then(function(readme) {
                 return {
@@ -151,6 +154,16 @@ module.exports = function(config) {
       .then((renderData) => {
         nitroPatternValidator.validateComponent(renderData.component);
         res.render(config.componentView, renderData);
+      })
+      .catch(next);
+  });
+
+  app.get('/components/:componentType/:componentName/:exampleName', function(req, res, next) {
+    getExampleRenderData(req.params.componentType, req.params.componentName, req.params.exampleName)
+      .then((renderData) => {
+        renderData.example = renderData.examples[0];
+        nitroPatternValidator.validateComponent(renderData.component);
+        res.render(config.exampleView, renderData);
       })
       .catch(next);
   });
