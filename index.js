@@ -64,6 +64,7 @@ module.exports = function(config) {
   assert(config.root && fs.existsSync(config.root), `Please specify your component root folder e.g. { root: '/a/path'}`);
   assert(config.componentView, `Please specify your component view e.g. { componentView: 'component.hbs' }`);
   assert(config.exampleView, `Please specify your example view e.g. { exampleView: 'example.hbs' }`);
+  assert(config.examplePartial, `Please specify your example partial e.g. { examplePartial: 'partials/example.hbs' }`);
   assert(config.navigationView, `Please specify your navigation view e.g. { navigationView: 'navigation.hbs' }`);
 
   var app = express();
@@ -72,8 +73,8 @@ module.exports = function(config) {
     rootDirectory: config.root,
     examples: true,
     readme: true,
-    readmeRenderer: (renderData) => readmeRenderer(renderData),
-    exampleRenderer: (renderData) => exampleRenderer(renderData, app, config.exampleView)
+    readmeRenderer: (resolver, renderData) => readmeRenderer(resolver, renderData),
+    exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial)
   });
   // Optional - track webpack dependencies
   var webpackDependencyStats;
