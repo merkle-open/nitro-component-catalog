@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
 var NitroPatternResolver = require('nitro-pattern-resolver');
-var NitroPatternValidator = require('nitro-pattern-validator');
+var NitroComponentValidator = require('nitro-component-validator');
 var WebpackDependencyStats = require('webpack-dependency-stats');
 var _ = require('lodash');
 var readmeRenderer = require('./lib/readme-renderer.js');
@@ -68,7 +68,7 @@ module.exports = function(config) {
   assert(config.navigationView, `Please specify your navigation view e.g. { navigationView: 'navigation.hbs' }`);
 
   var app = express();
-  var nitroPatternValidator = config.nitroPatternValidator || new NitroPatternValidator();
+  var nitroComponentValidator = config.nitroComponentValidator || new NitroComponentValidator();
   var nitroPatternResolver = config.nitroPatternResolver || new NitroPatternResolver({
     rootDirectory: config.root,
     examples: true,
@@ -117,7 +117,7 @@ module.exports = function(config) {
   app.get('/', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
-        nitroPatternValidator.validateComponents(patternFileInfo);
+        nitroComponentValidator.validateComponents(patternFileInfo);
         res.render(config.navigationView, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
@@ -128,7 +128,7 @@ module.exports = function(config) {
   app.get('/components', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
-        nitroPatternValidator.validateComponents(patternFileInfo);
+        nitroComponentValidator.validateComponents(patternFileInfo);
         res.render(config.navigationView, {
           patternFileInfo: _.sortBy(patternFileInfo, 'name')
         });
@@ -139,7 +139,7 @@ module.exports = function(config) {
   app.get('/components/:componentType', function(req, res, next) {
     nitroPatternResolver.getComponents()
       .then(function(patternFileInfo) {
-        nitroPatternValidator.validateComponents(patternFileInfo);
+        nitroComponentValidator.validateComponents(patternFileInfo);
         res.render(config.navigationView, {
           patternFileInfo: _.sortBy(_.filter(patternFileInfo, function(pattern) {
             return pattern.type === req.params.componentType;
@@ -152,7 +152,7 @@ module.exports = function(config) {
   app.get('/components/:componentType/:componentName', function(req, res, next) {
     getExampleRenderData(req.params.componentType, req.params.componentName)
       .then((renderData) => {
-        nitroPatternValidator.validateComponent(renderData.component);
+        nitroComponentValidator.validateComponent(renderData.component);
         res.render(config.componentView, renderData);
       })
       .catch(next);
@@ -162,7 +162,7 @@ module.exports = function(config) {
     getExampleRenderData(req.params.componentType, req.params.componentName, req.params.exampleName)
       .then((renderData) => {
         renderData.example = renderData.examples[0];
-        nitroPatternValidator.validateComponent(renderData.component);
+        nitroComponentValidator.validateComponent(renderData.component);
         res.render(config.exampleView, renderData);
       })
       .catch(next);
