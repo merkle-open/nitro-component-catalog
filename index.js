@@ -2,8 +2,8 @@ var express = require('express');
 var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
-var NitroPatternResolver = require('nitro-pattern-resolver');
-var NitroComponentValidator = require('nitro-component-validator');
+var NitroComponentResolver = require('@namics/nitro-component-resolver');
+var NitroComponentValidator = require('@namics/nitro-component-validator');
 var WebpackDependencyStats = require('webpack-dependency-stats');
 var _ = require('lodash');
 var readmeRenderer = require('./lib/readme-renderer.js');
@@ -69,7 +69,7 @@ module.exports = function(config) {
 
   var app = express();
   var nitroComponentValidator = config.nitroComponentValidator || new NitroComponentValidator();
-  var nitroPatternResolver = config.nitroPatternResolver || new NitroPatternResolver({
+  var nitroPatternResolver = config.nitroPatternResolver || new NitroComponentResolver({
     rootDirectory: config.root,
     examples: true,
     readme: true,

@@ -1,4 +1,4 @@
-# Nitro Pattern Navigator Plugin
+# Nitro Component Catalog Plugin
 
 This plugin allows you to navigate and preview all your components.
 
@@ -8,18 +8,18 @@ This plugin allows you to navigate and preview all your components.
 npm i --save-dev nitro-pattern-navigator
 ```
 
-## Adding it to nitro
+## Integration into nitro
 
-Place the following configuration file to your `projects/routes/pattern-navigatior.js`
+Place the following configuration file to your `projects/routes/pattern-catalog.js`
 
-**pattern-navigatior.js**
+**component-catalog.js**
 ```js
-var nitroPatternNavigation = require('nitro-pattern-navigator');
+var nitroPatternNavigation = require('@namics/nitro-component-catalog');
 var path = require('path');
 // Frontify demos
 module.exports = function(app) {
 
-  app.use('/', nitroPatternNavigation({
+  app.use('/', nitroComponentCatalog({
     // The location of your component source files
   	root: path.resolve(__dirname, '../../components'),
 
@@ -32,16 +32,17 @@ module.exports = function(app) {
     // The navigation view - 'navigation' resolves to views/navigation.hbs
   	navigationView: 'navigation',
 
-    // Optional if you are using the webpack you might pass the compiler instance:
-  	webpackApp: require('./webpack').webpackMiddleware,
+    // Optional if you are using the webpack you might pass the compiler instance
+    // This will NOT handle your webpack compilation but only visualise the dependencies
+  	webpackApp: webpack(webpackConfig),
 
     // Optional - if your project needs specific resolver settings you can pass
     // a custom resolver instance
-    nitroPatternResolver: new NitroPatternResolver(/* ... */),
+    nitroComponentResolver: new NitroComponentResolver(/* ... */),
 
     // Optional - if your project needs additional validations on the pattern.json
     // you can pass a custom validator instance
-    nitroPatternValidator: new NitroPatternValidator(/* ... */),
+    nitroComponentValidator: new NitroComponentValidator(/* ... */),
   }));
 
 };
