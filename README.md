@@ -1,5 +1,9 @@
 # Nitro Component Catalog Plugin
 
+[![npm version](https://badge.fury.io/js/%40namics%2Fnitro-component-catalog.svg)](https://badge.fury.io/js/%40namics%2Fnitro-component-catalog)
+[![Build Status](https://travis-ci.org/namics/nitro-component-catalog.svg?branch=master)](https://travis-ci.org/namics/nitro-component-catalog)
+[![Coverage Status](https://coveralls.io/repos/github/namics/nitro-component-catalog/badge.svg?branch=master)](https://coveralls.io/github/namics/nnitro-component-catalog?branch=master)
+
 This plugin allows you to navigate and preview all your components.
 
 ## Installation
