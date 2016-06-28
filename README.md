@@ -6,6 +6,8 @@
 
 This plugin allows you to navigate and preview all your components.
 
+![Component view](https://raw.githubusercontent.com/namics/nitro-component-catalog/master/preview.png)
+
 ## Installation
 
 ```bash
