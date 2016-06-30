@@ -79,9 +79,11 @@ module.exports = function(config) {
   // Optional - track webpack dependencies
   var webpackDependencyStats;
   if (config.webpack) {
-    config.webpack.plugin('done', function(stats) {
-      webpackDependencyStats = new WebpackDependencyStats(stats, {
-        srcFolder: config.root
+    Promise.resolve(config.webpack).then((compiler) => {
+      compiler.plugin('done', function(stats) {
+        webpackDependencyStats = new WebpackDependencyStats(stats, {
+          srcFolder: config.root
+        });
       });
     });
   }
