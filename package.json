@@ -1,6 +1,6 @@
 {
   "name": "@namics/nitro-component-catalog",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Express app to view all components",
   "main": "index.js",
   "files": [
@@ -27,7 +27,7 @@
     "highlight.js": "^9.5.0",
     "lodash": "^4.13.1",
     "marked": "^0.3.5",
-    "@namics/nitro-component-resolver": "~0.0.3",
+    "@namics/nitro-component-resolver": "~0.0.4",
     "@namics/nitro-component-validator": "~0.0.2",
     "webpack-dependency-stats": "0.0.3"
   }
