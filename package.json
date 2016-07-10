@@ -1,6 +1,6 @@
 {
   "name": "@namics/nitro-component-catalog",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Express app to view all components",
   "main": "index.js",
   "files": [
