@@ -72,6 +72,7 @@ module.exports = function(config) {
   var nitroPatternResolver = config.nitroPatternResolver || new NitroComponentResolver({
     rootDirectory: config.root,
     examples: true,
+    cacheExamples: config.cacheExamples,
     readme: true,
     readmeRenderer: (resolver, renderData) => readmeRenderer(resolver, renderData),
     exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial, app.locals.baseHref + '/components/')
@@ -116,41 +117,40 @@ module.exports = function(config) {
 
   app.once('mount', () => app.locals.baseHref = app.mountpath.replace(/\/$/, ''));
 
-  app.get('/', function(req, res, next) {
-    nitroPatternResolver.getComponents()
-      .then(function(patternFileInfo) {
-        nitroComponentValidator.validateComponents(patternFileInfo);
+  // Component list
+  app.get([
+    '/',
+    '/components',
+    '/components/:componentType'
+  ], function(req, res, next) {
+    Promise.resolve(req.params.componentType
+      ? [req.params.componentType]
+      : nitroPatternResolver.getComponentTypes()
+    )
+      // Get sorted component for all type as object
+      .then((types) =>
+        // Read and sort all package.json files
+        Promise.all(
+          types.map((type) =>
+            nitroPatternResolver.getComponents(type)
+              .then((components) => _.sortBy(components, 'name'))
+          )
+        )
+        // Turn into object
+        // { atoms: [ {..}, {..} ], molecules: [ {..}, [..]] }
+        .then((typeComponents) => _.zipObject(types, typeComponents))
+      )
+      // Render patterns
+      .then((componentTypes) => {
         res.render(config.navigationView, {
-          patternFileInfo: _.sortBy(patternFileInfo, 'name')
+          componentTypes
         });
       })
+      // Report any error
       .catch(next);
   });
 
-  app.get('/components', function(req, res, next) {
-    nitroPatternResolver.getComponents()
-      .then(function(patternFileInfo) {
-        nitroComponentValidator.validateComponents(patternFileInfo);
-        res.render(config.navigationView, {
-          patternFileInfo: _.sortBy(patternFileInfo, 'name')
-        });
-      })
-      .catch(next);
-  });
-
-  app.get('/components/:componentType', function(req, res, next) {
-    nitroPatternResolver.getComponents()
-      .then(function(patternFileInfo) {
-        nitroComponentValidator.validateComponents(patternFileInfo);
-        res.render(config.navigationView, {
-          patternFileInfo: _.sortBy(_.filter(patternFileInfo, function(pattern) {
-            return pattern.type === req.params.componentType;
-          }), 'name')
-        });
-      })
-      .catch(next);
-  });
-
+  // Component preview
   app.get('/components/:componentType/:componentName', function(req, res, next) {
     getExampleRenderData(req.params.componentType, req.params.componentName)
       .then((renderData) => {
@@ -160,6 +160,7 @@ module.exports = function(config) {
       .catch(next);
   });
 
+  // Component example detail view
   app.get('/components/:componentType/:componentName/:exampleName', function(req, res, next) {
     getExampleRenderData(req.params.componentType, req.params.componentName, req.params.exampleName)
       .then((renderData) => {

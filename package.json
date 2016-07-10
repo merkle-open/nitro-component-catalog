@@ -1,6 +1,6 @@
 {
   "name": "@namics/nitro-component-catalog",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Express app to view all components",
   "main": "index.js",
   "files": [
@@ -21,13 +21,13 @@
   },
   "homepage": "https://github.com/namics/nitro-component-catalog#readme",
   "dependencies": {
-    "ajv": "^4.1.5",
+    "ajv": "^4.1.6",
     "denodeify": "^1.2.1",
     "express": "^4.14.0",
     "highlight.js": "^9.5.0",
     "lodash": "^4.13.1",
     "marked": "^0.3.5",
-    "@namics/nitro-component-resolver": "~0.0.4",
+    "@namics/nitro-component-resolver": "~0.0.6",
     "@namics/nitro-component-validator": "~0.0.2",
     "webpack-dependency-stats": "0.0.3"
   }
