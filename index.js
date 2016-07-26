@@ -115,6 +115,8 @@ module.exports = function(config) {
 
   app.locals.baseHref = '';
 
+  var viewData = _.extend({}, config.viewData, app.locals);
+
   app.once('mount', () => app.locals.baseHref = app.mountpath.replace(/\/$/, ''));
 
   // Component list
@@ -142,9 +144,8 @@ module.exports = function(config) {
       )
       // Render patterns
       .then((componentTypes) => {
-        res.render(config.navigationView, {
-          componentTypes
-        });
+        var renderData = _.extend({}, viewData, { pageTitle: 'Pattern overview' }, { componentTypes });
+        res.render(config.navigationView, renderData);
       })
       // Report any error
       .catch(next);
@@ -154,8 +155,9 @@ module.exports = function(config) {
   app.get('/components/:componentType/:componentName', function(req, res, next) {
     getExampleRenderData(req.params.componentType, req.params.componentName)
       .then((renderData) => {
+        var patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + ' ' + req.params.componentName + ' [' + req.params.componentType + ']' }, renderData);
         nitroComponentValidator.validateComponent(renderData.component);
-        res.render(config.componentView, renderData);
+        res.render(config.componentView, patternData);
       })
       .catch(next);
   });
@@ -166,7 +168,8 @@ module.exports = function(config) {
       .then((renderData) => {
         renderData.example = renderData.examples[0];
         nitroComponentValidator.validateComponent(renderData.component);
-        res.render(config.exampleView, renderData);
+        var patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']' }, renderData);
+        res.render(config.exampleView, patternData);
       })
       .catch(next);
   });

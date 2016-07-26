@@ -13,7 +13,7 @@ This plugin allows you to navigate and preview all your components.
 ## Installation
 
 ```bash
-npm i --save-dev nitro-pattern-navigator
+npm i --save-dev nitro-component-catalog
 ```
 
 ## Integration into nitro
@@ -29,20 +29,26 @@ module.exports = function(app) {
 
   app.use('/', nitroComponentCatalog({
     // The location of your component source files
-  	root: path.resolve(__dirname, '../../components'),
+    root: path.resolve(__dirname, '../../components'),
 
     // The component preview view - 'preview' resolves to  views/component.hbs
-  	componentView: 'component',
+    componentView: 'component',
 
     // The example view - 'example' resolves to views/example.hbs
-  	exampleView: 'example',
+    exampleView: 'example',
+    
+    // The example partial - '_partials/example' resolves to views/_partials/example.hbs
+    examplePartial: '_partials/example',
 
     // The navigation view - 'navigation' resolves to views/navigation.hbs
-  	navigationView: 'navigation',
+    navigationView: 'navigation',
+    
+    // Optional - additional view data
+    viewData: app.locals,
 
-    // Optional if you are using the webpack you might pass the compiler instance
+    // Optional if you are using webpack you might pass the compiler instance
     // This will NOT handle your webpack compilation but only visualise the dependencies
-  	webpackApp: webpack(webpackConfig),
+    webpackApp: webpack(webpackConfig),
 
     // Optional - if your project needs specific resolver settings you can pass
     // a custom resolver instance
