@@ -1,12 +1,16 @@
 {
   "name": "@namics/nitro-component-catalog",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Express app to view all components",
   "main": "index.js",
   "files": [
     "index.js",
     "lib"
   ],
+  "scripts": {
+    "test": "npm run lint",
+    "lint": "eslint ."
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namics/nitro-component-catalog.git"
@@ -21,14 +25,18 @@
   },
   "homepage": "https://github.com/namics/nitro-component-catalog#readme",
   "dependencies": {
-    "ajv": "^4.1.6",
+    "ajv": "^4.4.1",
     "denodeify": "^1.2.1",
     "express": "^4.14.0",
-    "highlight.js": "^9.5.0",
-    "lodash": "^4.14.0",
-    "marked": "^0.3.5",
-    "@namics/nitro-component-resolver": "~0.0.6",
-    "@namics/nitro-component-validator": "~0.0.2",
+    "highlight.js": "^9.6.0",
+    "lodash": "^4.15.0",
+    "marked": "^0.3.6",
+    "@namics/nitro-component-resolver": "~0.0.7",
+    "@namics/nitro-component-validator": "~0.0.3",
     "webpack-dependency-stats": "0.0.3"
+  },
+  "devDependencies": {
+    "@namics/eslint-config": "^1.0.0",
+    "eslint": "^3.3.0"
   }
 }
