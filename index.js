@@ -67,6 +67,7 @@ module.exports = function (config) {
 	assert(config.root && fs.existsSync(config.root), `Please specify your component root folder e.g. { root: '/a/path'}`);
 	assert(config.componentView, `Please specify your component view e.g. { componentView: 'component.hbs' }`);
 	assert(config.exampleView, `Please specify your example view e.g. { exampleView: 'example.hbs' }`);
+	assert(config.exampleCodeView, `Please specify your example code view e.g. { exampleCodeView: 'code.hbs' }`);
 	assert(config.examplePartial, `Please specify your example partial e.g. { examplePartial: 'partials/example.hbs' }`);
 	assert(config.navigationView, `Please specify your navigation view e.g. { navigationView: 'navigation.hbs' }`);
 
@@ -173,6 +174,18 @@ module.exports = function (config) {
 				nitroComponentValidator.validateComponent(renderData.component);
 				const patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']' }, renderData);
 				res.render(config.exampleView, patternData);
+			})
+			.catch(next);
+	});
+
+	// Component example detail code view
+	app.get('/components/:componentType/:componentName/:exampleName/code', (req, res, next) => {
+		getExampleRenderData(req.params.componentType, req.params.componentName, req.params.exampleName)
+			.then((renderData) => {
+				renderData.example = renderData.examples[0];
+				nitroComponentValidator.validateComponent(renderData.component);
+				const patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']' }, renderData);
+				res.render(config.exampleCodeView, patternData);
 			})
 			.catch(next);
 	});

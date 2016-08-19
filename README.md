@@ -37,6 +37,9 @@ module.exports = function(app) {
     // The example view - 'example' resolves to views/example.hbs
     exampleView: 'example',
     
+    // The example code view - 'code' resolves to views/code.hbs
+    exampleCodeView: 'code',
+    
     // The example partial - '_partials/example' resolves to views/_partials/example.hbs
     examplePartial: '_partials/example',
 
