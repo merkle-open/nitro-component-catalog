@@ -1,7 +1,7 @@
 Change History
 ==============
 
-v0.0.10
+v0.0.11
 -------
 * pretty output of html
 * add code view
