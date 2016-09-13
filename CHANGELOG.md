@@ -1,5 +1,9 @@
 # Change History
 
+## v0.0.13
+
+* add htmlBaseHref to app.locals
+
 ## v0.0.12
 
 * prettify also output of html inline elements

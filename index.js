@@ -123,6 +123,12 @@ module.exports = function (config) {
 
 	app.once('mount', () => app.locals.baseHref = app.mountpath.replace(/\/$/, ''));
 
+	// Add href for base tag
+	app.use(function(req, res, next){
+		app.locals.htmlBaseHref = req.protocol + '://' + req.headers.host + '/';
+		return next();
+	});
+
 	// Component list
 	app.get([
 		'/',
