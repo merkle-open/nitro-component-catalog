@@ -46,7 +46,7 @@ function getDependencyInformation(componentType, componentName, webpackDependenc
 		// add link
 		.map((dependencyPath) => ({
 			name: dependencyPath,
-			url: baseHref + dependencyPath
+			url: baseHref + dependencyPath,
 		}));
 	result.dependents = _.sortedUniq(
 		webpackDependencyStats.getDependents(moduleName)
@@ -58,7 +58,7 @@ function getDependencyInformation(componentType, componentName, webpackDependenc
 		// add link
 		.map((dependentPath) => ({
 			name: dependentPath,
-			url: baseHref + dependentPath
+			url: baseHref + dependentPath,
 		}));
 	return result;
 }
@@ -70,8 +70,10 @@ module.exports = function (config) {
 	assert(config.exampleCodeView, `Please specify your example code view e.g. { exampleCodeView: 'code.hbs' }`);
 	assert(config.examplePartial, `Please specify your example partial e.g. { examplePartial: 'partials/example.hbs' }`);
 	assert(config.navigationView, `Please specify your navigation view e.g. { navigationView: 'navigation.hbs' }`);
+	config.pageTitle = config.pageTitle || 'Pattern';
 
 	const app = express();
+	let baseHref = '';
 	const nitroComponentValidator = config.nitroComponentValidator || new NitroComponentValidator();
 	const nitroComponentResolver = config.nitroComponentResolver || new NitroComponentResolver({
 		rootDirectory: config.root,
@@ -79,7 +81,7 @@ module.exports = function (config) {
 		cacheExamples: config.cacheExamples,
 		readme: true,
 		readmeRenderer: (resolver, renderData) => readmeRenderer(resolver, renderData),
-		exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial, app.locals.baseHref + '/components/')
+		exampleRenderer: (resolver, renderData) => exampleRenderer(resolver, renderData, app, config.examplePartial, baseHref + '/components/'),
 	});
 	// Optional - track webpack dependencies
 	let webpackDependencyStats;
@@ -87,14 +89,14 @@ module.exports = function (config) {
 		Promise.resolve(config.webpack).then((compiler) => {
 			compiler.plugin('done', (stats) => {
 				webpackDependencyStats = new WebpackDependencyStats(stats, {
-					srcFolder: config.root
+					srcFolder: config.root,
 				});
 			});
 		});
 	}
 
 	function getExampleRenderData(componentType, componentName, exampleName) {
-		const dependencyInformation = getDependencyInformation(componentType, componentName, webpackDependencyStats, app.locals.baseHref + '/components/');
+		const dependencyInformation = getDependencyInformation(componentType, componentName, webpackDependencyStats, baseHref + '/components/');
 		return nitroComponentResolver.getComponent(componentType + '/' + componentName)
 			.then((component) => {
 				return nitroComponentResolver.getComponentExamples(component.directory)
@@ -110,30 +112,35 @@ module.exports = function (config) {
 									component,
 									componentDependencies: dependencyInformation.dependencies,
 									componentDependents: dependencyInformation.dependents,
-									readme
+									readme,
 								};
 							});
 					});
 			});
 	}
 
-	app.locals.baseHref = '';
-
-	const viewData = _.extend({}, config.viewData, app.locals);
-
-	app.once('mount', () => app.locals.baseHref = app.mountpath.replace(/\/$/, ''));
+	app.once('mount', () => {
+		baseHref = app.mountpath.replace(/\/$/, '');
+	});
 
 	// Add href for base tag
-	app.use(function(req, res, next){
+	app.use((req, res, next) => {
 		app.locals.htmlBaseHref = req.protocol + '://' + req.headers.host + '/';
 		return next();
 	});
+
+	/**
+	 * Returns the base data which is available for all views
+	 */
+	function getViewData() {
+		return _.extend({}, config.viewData, app.locals, { baseHref });
+	}
 
 	// Component list
 	app.get([
 		'/',
 		'/components',
-		'/components/:componentType'
+		'/components/:componentType',
 	], (req, res, next) => {
 		Promise.resolve(req.params.componentType
 			? [req.params.componentType]
@@ -154,7 +161,7 @@ module.exports = function (config) {
 			)
 			// Render patterns
 			.then((componentTypes) => {
-				const renderData = _.extend({}, viewData, { pageTitle: 'Pattern overview' }, { componentTypes });
+				const renderData = _.extend({}, getViewData(), { pageTitle: `${config.pageTitle} - overview` }, { componentTypes });
 				res.render(config.navigationView, renderData);
 			})
 			// Report any error
@@ -165,7 +172,7 @@ module.exports = function (config) {
 	app.get('/components/:componentType/:componentName', (req, res, next) => {
 		getExampleRenderData(req.params.componentType, req.params.componentName)
 			.then((renderData) => {
-				const patternData = _.extend({}, viewData, { pageTitle: `Pattern: ${req.params.componentName} [${req.params.componentType}]` }, renderData);
+				const patternData = _.extend({}, getViewData(), { pageTitle: `${config.pageTitle} ${req.params.componentName} [${req.params.componentType}]` }, renderData);
 				nitroComponentValidator.validateComponent(renderData.component);
 				res.render(config.componentView, patternData);
 			})
@@ -178,7 +185,9 @@ module.exports = function (config) {
 			.then((renderData) => {
 				renderData.example = renderData.examples[0];
 				nitroComponentValidator.validateComponent(renderData.component);
-				const patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']' }, renderData);
+				const patternData = _.extend({}, getViewData(), {
+					pageTitle: config.pageTitle + ' ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']',
+				}, renderData);
 				res.render(config.exampleView, patternData);
 			})
 			.catch(next);
@@ -190,7 +199,9 @@ module.exports = function (config) {
 			.then((renderData) => {
 				renderData.example = renderData.examples[0];
 				nitroComponentValidator.validateComponent(renderData.component);
-				const patternData = _.extend({}, viewData, { pageTitle: 'Pattern: ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']' }, renderData);
+				const patternData = _.extend({}, getViewData(), {
+					pageTitle: config.pageTitle + ' ' + req.params.componentName + ' - ' + req.params.exampleName + ' [' + req.params.componentType + ']',
+				}, renderData);
 				res.render(config.exampleCodeView, patternData);
 			})
 			.catch(next);

@@ -36,18 +36,21 @@ module.exports = function(app) {
 
     // The example view - 'example' resolves to views/example.hbs
     exampleView: 'example',
-    
+
     // The example code view - 'code' resolves to views/code.hbs
     exampleCodeView: 'code',
-    
+
     // The example partial - '_partials/example' resolves to views/_partials/example.hbs
     examplePartial: '_partials/example',
 
     // The navigation view - 'navigation' resolves to views/navigation.hbs
     navigationView: 'navigation',
-    
+
     // Optional - additional view data
-    viewData: app.locals,
+    viewData: app.locals,    
+
+    // Optional - page title prefix
+    pageTitle: 'Pattern library',
 
     // Optional if you are using webpack you might pass the compiler instance
     // This will NOT handle your webpack compilation but only visualise the dependencies

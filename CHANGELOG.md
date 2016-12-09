@@ -1,5 +1,10 @@
 # Change History
 
+## v0.0.14
+
+* fix baseHref
+* add `config.pageTitle`
+
 ## v0.0.13
 
 * add htmlBaseHref to app.locals
