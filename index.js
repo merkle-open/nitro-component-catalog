@@ -138,7 +138,6 @@ module.exports = function (config) {
 
 	// Component list
 	app.get([
-		'/',
 		'/components',
 		'/components/:componentType',
 	], (req, res, next) => {
