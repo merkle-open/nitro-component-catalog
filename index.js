@@ -133,7 +133,7 @@ module.exports = function (config) {
 	 * Returns the base data which is available for all views
 	 */
 	function getViewData() {
-		return _.extend({}, config.viewData, app.locals, { baseHref });
+		return _.extend({}, app.locals, config.viewData, { baseHref });
 	}
 
 	// Component list
