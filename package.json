@@ -1,6 +1,6 @@
 {
   "name": "@namics/nitro-component-catalog",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Express app to view all components",
   "main": "index.js",
   "files": [
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@namics/eslint-config": "^2.1.0",
-    "eslint": "^3.11.1",
+    "eslint": "^3.12.2",
     "eslint-plugin-import": "^2.2.0"
   }
 }

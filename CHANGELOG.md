@@ -1,5 +1,10 @@
 # Change History
 
+## v0.0.15
+
+* (fix) do not respond to root route
+* (fix) app.locals should not overwrite passed viewData
+
 ## v0.0.14
 
 * fix baseHref
